@@ -6,7 +6,12 @@ Topic Based Sentiment Detection using BERT
 - torch
 - streamlit
 - fastapi
-- sklearn
+- Pandas
+- Alternatively, run the docker image with standard config
+
+### Setup
+- Clone
+- Install requirements
 
 ## Train
 Run ``
