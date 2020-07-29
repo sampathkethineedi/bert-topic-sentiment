@@ -6,7 +6,12 @@ Topic Based Sentiment Detection using BERT
 - torch
 - streamlit
 - fastapi
-- sklearn
+- Pandas
+- Alternatively, run the docker image with standard config
+
+### Setup
+- Clone
+- Install requirements
 
 ## Train
 Run ``
@@ -30,3 +35,8 @@ App at `http://localhost:8501/`
 - Add visual metrics to Trainer
 - Add colab notebook for data exploration
 - Docker image
+
+## References
+- Add Alternative approaches
+- Links to useful resources
+
