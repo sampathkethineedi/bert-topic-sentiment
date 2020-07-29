@@ -1,0 +1,51 @@
+from dataset import PandasDataset, TorchDataset
+from transformers import BertTokenizer, BertConfig
+import config
+from model import BERTClass, Trainer, FocalLossLogits
+import torch
+
+config = config.Settings()
+
+pd_dataset = PandasDataset("sentisum-evaluation-dataset.csv")
+pd_dataset.load_data()
+
+
+pd_dataset.adjust_labels()
+
+
+pd_dataset.drop_majority_labels('value for money positive', 0.1)
+pd_dataset.drop_majority_labels('garage service positive', 0.2)
+pd_dataset.drop_majority_label_combo('value for money positive', 'garage service positive', 0.2)
+
+
+pd_dataset.current_df.sample(frac=0.01)
+pd_dataset.encode_labels()
+
+
+train_dataset, test_dataset = pd_dataset.train_test_split(0.2)
+
+tokenizer = BertTokenizer.from_pretrained(config.PRE_TRAINED_MODEL)
+
+torch_training_set = TorchDataset(train_dataset, tokenizer, config.MAX_LEN)
+torch_testing_set = TorchDataset(test_dataset, tokenizer, config.MAX_LEN)
+
+training_dataloader = torch_training_set.get_dataloader(batch_size=16)
+testing_dataloader = torch_testing_set.get_dataloader(batch_size=8)
+
+model_config = BertConfig()
+model = BERTClass(model_config)
+model.to(config.DEVICE)
+
+optimizer = torch.optim.Adam(params=model.parameters(), lr=config.LEARNING_RATE)
+
+
+def loss_fn(outputs, targets):
+    return FocalLossLogits()(outputs, targets)
+
+
+trainer = Trainer(config.MODEL_DIR)
+trainer.prepare(model, optimizer, loss_fn)
+
+trainer.train(config.EPOCHS, training_dataloader, testing_dataloader, validate=True)
+
+trainer.save_all(config.MODEL_DIR, tokenizer, torch_training_set.label_encoder)
