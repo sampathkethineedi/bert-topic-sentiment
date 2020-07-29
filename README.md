@@ -30,3 +30,8 @@ App at `http://localhost:8501/`
 - Add visual metrics to Trainer
 - Add colab notebook for data exploration
 - Docker image
+
+## References
+- Add Alternative approaches
+- Links to useful resources
+
