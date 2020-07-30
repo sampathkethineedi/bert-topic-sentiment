@@ -6,7 +6,7 @@ SPAWNER_API = "http://127.0.0.1:8000/"
 headers = {'content-type': 'application/json'}
 
 
-st.write("## SentiSum Topic Based Sentiment Detection")
+st.write("## Topic Based Sentiment Detection")
 st.write("### Fine Tuning multi label classification model on top of BERT")
 st.write("API Docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)")
 
@@ -29,4 +29,5 @@ if st.button("Submit"):
 
 st.write("**Developer**: Sampath Kethineedi")
 st.write("**Mail**: sampath.kethineedi9@gmail.com")
-st.write("Code at my GitHub repo [sentisum-topic-sentiment](https://github.com/sampathkethineedi/sentisum-topic-sentiment)")
+st.write("Code at my GitHub repo [bert-topic-sentiment](https://github.com/sampathkethineedi/bert-topic-sentiment.git)")
+st.write("**Dataset by SentiSum**")
