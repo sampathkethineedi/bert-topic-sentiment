@@ -2,7 +2,7 @@
 
 ![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/master/st_demo.png?raw=true)
 
-Jump to this [document](https://github.com/sampathkethineedi/sentisum-topic-sentiment/tree/master/approach) to undertand the data, approach and further improvements
+Jump to this [document](https://github.com/sampathkethineedi/sentisum-topic-sentiment/tree/master/approach) to understand the data, approach and further improvements
 
 ### Requirements
 - transformers
