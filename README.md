@@ -17,22 +17,26 @@ Topic Based Sentiment Detection using BERT
 
 ## Training
 
-Pandas and Torch dataset classes in **dataset.py**
+Pandas and Torch dataset classes in **topicsentiment/dataset.py**
 
-Model Class and Trainer Class in **model.py**
+Model Class and Trainer Class in **topicsentiment/model.py**
+
+Jump to topicsentiment for detailed info
 
 Configuration in **config.py**
 
 Run `python main_process.py --data sentisum-evaluation-dataset.csv --train`
 
 ## Prediction API
-Using FastAPI
+Built using FastAPI
 
 Run `uvicorn prediction_api:app`
 
 Swagger Docs at `http://127.0.0.1:8000/docs`
 
 ## Streamlit Interface
+Simple Interface built using streamlit
+
 Code in **st_app.py**
 
 Run `streamlit run st_app.py`
