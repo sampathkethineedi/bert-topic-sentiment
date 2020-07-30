@@ -14,7 +14,6 @@ config = config.Settings()
 model_config = BertConfig()
 model = BertForMultiLabel(model_config)
 model.load_state_dict(torch.load(os.path.join(config.MODEL_DIR, config.MODEL_NAME_COLAB), map_location=config.DEVICE))
-
 tokenizer = AutoTokenizer.from_pretrained(config.PRE_TRAINED_MODEL)
 
 with open(os.path.join(config.MODEL_DIR, 'label_encoder.pkl'), 'rb') as f:

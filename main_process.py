@@ -1,7 +1,7 @@
-from dataset import PandasDataset, TorchDataset
+from topicsentiment.dataset import PandasDataset, TorchDataset
 from transformers import BertTokenizer, BertConfig
 import config
-from model import BertForMultiLabel, Trainer, FocalLossLogits
+from topicsentiment.model import BertForMultiLabel, Trainer, FocalLossLogits
 import pandas as pd
 import torch
 import argparse
@@ -52,8 +52,8 @@ def prepare_train(train_dataset, test_dataset, verbose=False):
     torch_training_set = TorchDataset(train_dataset, tokenizer, config.MAX_LEN)
     torch_testing_set = TorchDataset(test_dataset, tokenizer, config.MAX_LEN)
 
-    training_dataloader = torch_training_set.get_dataloader(batch_size=16)
-    testing_dataloader = torch_testing_set.get_dataloader(batch_size=8)
+    training_dataloader = torch_training_set.get_dataloader(batch_size=config.TRAIN_BATCH_SIZE)
+    testing_dataloader = torch_testing_set.get_dataloader(batch_size=config.VALID_BATCH_SIZE)
 
     model_config = BertConfig()
     model = BertForMultiLabel(model_config)
