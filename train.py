@@ -6,17 +6,28 @@ import pandas as pd
 import torch
 import argparse
 import logging
+import os
+import sys
 
 config = config.Settings()
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+fh = logging.FileHandler(os.path.join(config.MODEL_DIR, 'training.log'))
+fh.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 
 def pre_process(filename: str = 'sentisum-evaluation-dataset.csv', verbose: bool = False):
-    pd_dataset = PandasDataset(filename)
-    pd_dataset.load_data()
+    pd_dataset = PandasDataset()
+    pd_dataset.read_data(filename)
     logger.info('Dataset loaded')
 
     pd.set_option('display.max_rows', 100)
@@ -43,13 +54,14 @@ def pre_process(filename: str = 'sentisum-evaluation-dataset.csv', verbose: bool
 
     pd_dataset.encode_labels()
 
+    return pd_dataset
+
+
+def prepare_train(pd_dataset: PandasDataset, verbose=False):
+
     train_dataset, test_dataset = pd_dataset.train_test_split(0.2)
-    logger.info('Pre processing complete...')
+    logger.info('Test Split complete...')
 
-    return train_dataset, test_dataset, pd_dataset.label_encoder
-
-
-def prepare_train(train_dataset, test_dataset, verbose=False):
     tokenizer = BertTokenizer.from_pretrained(config.PRE_TRAINED_MODEL)
 
     torch_training_set = TorchDataset(train_dataset, tokenizer, config.MAX_LEN)
@@ -88,23 +100,57 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, required=True)
     parser.add_argument("--train", dest="train", action="store_true", default=False)
+    parser.add_argument("--preprocess", dest="preprocess", action="store_true", default=False)
     parser.add_argument("--verbose", dest="verbose", action="store_true", default=False)
 
     return parser.parse_args()
 
 
-if __name__ == "__main__":
-    args = parse_args()
-    train_dataset, test_dataset, label_encoder = pre_process(args.data, args.verbose)
+def train(pd_dataset, verbose):
 
-    if args.train:
-        trainer, training_dataloader, testing_dataloader, tokenizer = prepare_train(train_dataset,
-                                                                                    test_dataset,
-                                                                                    args.verbose)
+    try:
+        trainer, training_dataloader, testing_dataloader, tokenizer = prepare_train(pd_dataset, verbose)
         logger.info("Training started...")
+    except Exception as err:
+        logger.error(err)
+        sys.exit()
+
+    try:
         trainer.train(config.EPOCHS, training_dataloader, testing_dataloader, validate=True)
         trainer.save_metric_plots()
         logger.info("Training complete")
+    except Exception as err:
+        logger.error(err)
+        sys.exit()
 
-        trainer.save_all(config.MODEL_DIR, tokenizer, label_encoder)
-        logger.info("Files saved at "+config.MODEL_DIR)
+    try:
+        trainer.save_all(config.MODEL_DIR, tokenizer, pd_dataset.label_encoder)
+        logger.info("Files saved at " + config.MODEL_DIR)
+    except Exception as err:
+        logger.error(err)
+        sys.exit()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    if args.preprocess:
+        try:
+            pd_dataset = pre_process(args.data, args.verbose)
+            pd_dataset.save_dataset(os.path.join(config.MODEL_DIR, 'final_data.pkl'))
+        except Exception as err:
+            logger.error(err)
+            sys.exit()
+
+        logger.info("Cleaned dataset saved at "+os.path.join(config.MODEL_DIR, 'final_data.pkl'))
+
+    elif args.train:
+        pd_dataset = PandasDataset()
+        pd_dataset.from_preprocessed(args.data)
+        train(pd_dataset, args.verbose)
+
+    else:
+        pd_dataset = pre_process(args.data, args.verbose)
+        train(pd_dataset, args.verbose)
+
+

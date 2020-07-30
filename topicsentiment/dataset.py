@@ -3,25 +3,33 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
 import torch
+import pickle
 
 
 class PandasDataset:
     """Class to simplify pre processing steps on dataframe. Requires prioir understanding of the dataset
 
     """
-    def __init__(self, filename: str = "sentisum-evaluation-dataset.csv"):
-        self.filename = filename
+    def __init__(self):
         self.original_df = None
         self.current_df = None
         self.label_encoder = None
 
-    def load_data(self):
+    def from_preprocessed(self, path: str):
+        with open(path, 'rb') as f:
+            dataset = pickle.load(f)
+            self.original_df = dataset.original_df
+            self.current_df = dataset.current_df
+            self.label_encoder = dataset.label_encoder
+            f.close()
+
+    def read_data(self, filename: str = "sentisum-evaluation-dataset.csv"):
         """Load the CSV file into a workable format
 
         :param:
         :return: pd dataset
         """
-        self.original_df = pd.read_csv(self.filename, header=None)
+        self.original_df = pd.read_csv(filename, header=None)
         data = self.original_df.fillna('')
 
         column_names = ['text']
@@ -158,6 +166,16 @@ class PandasDataset:
         train_dataset = train_dataset.reset_index(drop=True)
         test_dataset = test_dataset.reset_index(drop=True)
         return train_dataset, test_dataset
+
+    def save_dataset(self, path: str):
+        """
+
+        :param path:
+        :return:
+        """
+        output = open(path, 'wb')
+        pickle.dump(self, output)
+        output.close()
 
 
 class TorchDataset(Dataset):
