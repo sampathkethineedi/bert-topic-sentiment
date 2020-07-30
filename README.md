@@ -30,7 +30,11 @@ Jump to [topicsentiment](https://github.com/sampathkethineedi/sentisum-topic-sen
 
 Configuration in **config.py**
 
-Run `python train.py --data sentisum-evaluation-dataset.csv --train`
+Run `python train.py --data sentisum-evaluation-dataset.csv` for full pipeline - preprocess and train
+
+Run `python train.py --data sentisum-evaluation-dataset.csv --preprocess` saves the preprocessed dataset to *model_dir* in config
+
+Run `python train.py --data final_data.pkl --train` trains the preprocessed dataset
 
 ## Prediction API
 Built using FastAPI
