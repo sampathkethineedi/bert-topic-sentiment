@@ -4,7 +4,7 @@
 
 Jump to this [document](https://github.com/sampathkethineedi/sentisum-topic-sentiment/tree/master/approach) to understand the data, approach and further improvements
 
-### Requirements
+### Stack
 - transformers
 - torch
 - streamlit
