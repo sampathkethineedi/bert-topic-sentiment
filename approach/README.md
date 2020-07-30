@@ -15,8 +15,9 @@ FULL Dataset: 7757
 TRAIN Dataset: 6205
 VAL Dataset: 1552
 
-Training Accuracy Saturated at around 0.8 after 7 Epochs
-Training Loss quickly reached 0.2 and saturated at 0.008 after 7 Epochs
+Training Accuracy Saturated at around **0.8** after 7 Epochs
+
+Training Loss quickly reached **0.2** and saturated at **0.008** after 7 Epochs
 
 | Metric | Score |
 | --- | --- |
