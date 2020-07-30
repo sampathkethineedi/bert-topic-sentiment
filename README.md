@@ -54,8 +54,3 @@ App at `http://localhost:8501/`
 - Alternative approaches
 - Notebook for data exploration
 - Docker image
-
-## References
-- Add Alternative approaches
-- Links to useful resources
-
