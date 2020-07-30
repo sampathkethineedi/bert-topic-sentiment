@@ -1,7 +1,7 @@
 from dataset import PandasDataset, TorchDataset
 from transformers import BertTokenizer, BertConfig
 import config
-from model import BERTClass, Trainer, FocalLossLogits
+from model import BertForMultiLabel, Trainer, FocalLossLogits
 import pandas as pd
 import torch
 import argparse
@@ -35,11 +35,12 @@ def pre_process(filename: str = 'sentisum-evaluation-dataset.csv', verbose: bool
     pd_dataset.undersample_label_combo('value for money positive', 'garage service positive', 0.2)
     logger.info('Undersampling complete')
 
-    pd_dataset.current_df.sample(frac=0.01)  # todo only for dev
     if verbose:
         print(pd_dataset.overview())
 
     pd_dataset.encode_labels()
+
+    pd_dataset.current_df = pd_dataset.current_df.sample(frac=0.01)  # todo only for local dev
 
     train_dataset, test_dataset = pd_dataset.train_test_split(0.2)
     logger.info('Pre processing complete...')
@@ -57,7 +58,7 @@ def prepare_train(train_dataset, test_dataset, verbose=False):
     testing_dataloader = torch_testing_set.get_dataloader(batch_size=8)
 
     model_config = BertConfig()
-    model = BERTClass(model_config)
+    model = BertForMultiLabel(model_config)
     model.to(config.DEVICE)
     if verbose:
         print(model)
@@ -71,8 +72,7 @@ def prepare_train(train_dataset, test_dataset, verbose=False):
         def loss_fn(outputs, targets):
             return FocalLossLogits()(outputs, targets)
 
-    trainer = Trainer(config.MODEL_DIR)
-    trainer.prepare(model, optimizer, loss_fn)
+    trainer = Trainer(model, optimizer, loss_fn)
 
     logger.info("Trainer prepared")
 
@@ -106,3 +106,5 @@ if __name__ == "__main__":
 
         trainer.save_all(config.MODEL_DIR, tokenizer, label_encoder)
         logger.info("Files saved at "+config.MODEL_DIR)
+        print(trainer.metrics['epoch_loss'])
+        trainer.plot_metrics('epoch_loss')

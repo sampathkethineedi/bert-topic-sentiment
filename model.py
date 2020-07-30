@@ -38,6 +38,13 @@ class Trainer:
             "accuracy": []
         }
         self.global_epochs = 0
+        self.setup_folders()
+
+    @staticmethod
+    def setup_folders():
+        if not os.path.exists(config.MODEL_DIR):
+            os.makedirs(config.MODEL_DIR)
+            os.makedirs(os.path.join(config.MODEL_DIR, 'metrics'))
 
     def train(self, epochs, training_loader, testing_loader=None, validate=False):
         for epoch in range(epochs):
@@ -54,7 +61,7 @@ class Trainer:
                 self.optimizer.zero_grad()
                 loss = self.loss_fun(outputs, targets)
                 epoch_loss = loss.item()
-                if _ % 200 == 0:
+                if _ % 50 == 0:
                     print(f'Epoch: {epoch}, Loss:  {loss.item()}')
                     self.metrics["step_loss"].append(loss.item())
                 self.optimizer.zero_grad()
@@ -64,7 +71,7 @@ class Trainer:
             if validate:
                 self.validate(testing_loader)
 
-            self.metrics["loss"].append(epoch_loss)
+            self.metrics["epoch_loss"].append(epoch_loss)
 
         return self.metrics
 
@@ -74,10 +81,10 @@ class Trainer:
         fin_outputs = []
         with torch.no_grad():
             for _, data in enumerate(testing_loader, 0):
-                ids = data['input_ids'].to(self.device, dtype=torch.long)
-                mask = data['attention_mask'].to(self.device, dtype=torch.long)
+                ids = data['ids'].to(self.device, dtype=torch.long)
+                mask = data['mask'].to(self.device, dtype=torch.long)
                 token_type_ids = data['token_type_ids'].to(self.device, dtype=torch.long)
-                targets = data['labels'].to(self.device, dtype=torch.float)
+                targets = data['targets'].to(self.device, dtype=torch.float)
                 outputs = self.model(ids, mask, token_type_ids)
                 fin_targets.extend(targets.cpu().detach().numpy().tolist())
                 fin_outputs.extend(torch.sigmoid(outputs).cpu().detach().numpy().tolist())
@@ -99,20 +106,25 @@ class Trainer:
         torch.save(self.model, path)
 
     def save_all(self, path: str, tokenizer: BertTokenizer, label_encoder):
-        torch.save(self.model, path)
+        torch.save(self.model.state_dict(), os.path.join(path, config.MODEL_NAME))
         tokenizer.save_pretrained(path)
-        output = open(os.path.join(path, 'label_encoder.pkl', 'wb'))
+        output = open(os.path.join(path, 'label_encoder.pkl'), 'wb')
         pickle.dump(label_encoder, output)
         output.close()
 
-    def plot_metrics(self, metric: str):
+    def plot_metrics(self, metric: str, view: bool = False):
         plt.plot(range(len(self.metrics[metric])), self.metrics[metric], '-b', label=metric)
 
         plt.xlabel("Epochs")
         plt.legend(loc='upper left')
         plt.title(metric)
-        plt.savefig(os.path.join(config.MODEL_DIR, metric + ".png"))
-        plt.show()
+        plt.savefig(os.path.join(config.MODEL_DIR, 'metrics', metric + ".png"))
+        if view:
+            plt.show()
+
+    def save_metric_plots(self):
+        for metric in self.metrics.keys():
+            self.plot_metrics(metric)
 
 
 class FocalLossLogits(torch.nn.Module):
