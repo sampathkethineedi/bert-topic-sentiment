@@ -1,7 +1,7 @@
 # sentisum-topic-sentiment - dev
 Topic Based Sentiment Detection using BERT
 
-![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/dev/st_interface.jpg?raw=true)
+![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/dev/st_interface.png?raw=true)
 
 ### Requirements
 - transformers
