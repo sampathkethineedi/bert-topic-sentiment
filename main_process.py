@@ -9,8 +9,8 @@ import argparse
 config = config.Settings()
 
 
-def pre_process(verbose: bool = False):
-    pd_dataset = PandasDataset("sentisum-evaluation-dataset.csv")
+def pre_process(filename: str = "sentisum-evaluation-dataset.csv", verbose: bool = False):
+    pd_dataset = PandasDataset(filename)
     pd_dataset.load_data()
 
     pd.set_option('display.max_rows', 100)
@@ -18,11 +18,14 @@ def pre_process(verbose: bool = False):
     if verbose:
         print(pd_dataset.overview())
 
-    pd_dataset.adjust_labels()
+    pd_dataset.replace_labels('advisor/agent service negative', "advisoragent service negative")
+    pd_dataset.replace_labels('advisor/agent service positive', "advisoragent service positive")
 
-    pd_dataset.drop_majority_labels('value for money positive', 0.1)
-    pd_dataset.drop_majority_labels('garage service positive', 0.2)
-    pd_dataset.drop_majority_label_combo('value for money positive', 'garage service positive', 0.2)
+    pd_dataset.adjust_labels(minimum_samples=100, minority_label="others")
+
+    pd_dataset.undersample_label('value for money positive', 0.1)
+    pd_dataset.undersample_label('garage service positive', 0.2)
+    pd_dataset.undersample_label_combo('value for money positive', 'garage service positive', 0.2)
 
     pd_dataset.current_df.sample(frac=0.01)
     if verbose:

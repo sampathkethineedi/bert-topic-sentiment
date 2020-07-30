@@ -43,6 +43,14 @@ class PandasDataset:
 
         return self.current_df
 
+    def replace_labels(self, label: str, target: str):
+        self.current_df.topics.explode().str.replace(label, target)
+
+        def replace_lab(x):
+            return [top if top != label else target for top in x]
+
+        self.current_df.topics = self.current_df.topics.map(replace_lab)
+
     def adjust_labels(self, minimum_samples: int = 100, minority_label: str = 'others'):
         """Adjust labels
 
@@ -71,7 +79,7 @@ class PandasDataset:
 
         return self.current_df
 
-    def drop_majority_labels(self, topic: str, fraction: float):
+    def undersample_label(self, topic: str, fraction: float):
         temp_df = self.current_df[self.current_df.topics.apply(lambda x: topic in x)]
         temp_df = temp_df[temp_df.topics.str.len() == 1].sample(frac=fraction)
 
@@ -80,7 +88,7 @@ class PandasDataset:
         self.current_df = self.current_df.drop(drop_index)
         self.current_df = self.current_df.append(temp_df)
 
-    def drop_majority_label_combo(self, topic_a: str, topic_b: str, fraction: float):
+    def undersample_label_combo(self, topic_a: str, topic_b: str, fraction: float):
         temp_df = self.current_df[self.current_df.topics.apply(lambda x: x == [topic_a, topic_b])]
         temp_df = temp_df[temp_df.topics.str.len() == 2].sample(frac=fraction)
 
@@ -114,6 +122,13 @@ class PandasDataset:
         train_dataset = train_dataset.reset_index(drop=True)
         test_dataset = test_dataset.reset_index(drop=True)
         return train_dataset, test_dataset
+
+    def merge_topics(self):
+        """
+        todo Merge a list of topics to one
+        :return:
+        """
+        pass
 
 
 class TorchDataset(Dataset):
