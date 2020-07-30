@@ -41,6 +41,10 @@ In terms of sentiment, the majority are positive. This is largely because the tw
 
 I have under sampled these by removing a large fraction of single occurances. This also took care of the positive negative imbalance to an extent
 
+Here is label distribution of the final dataset. We have **23 topic-sentiment labels**
+
+![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/master/approach/labels_all_2.png?raw=true)
+
 We also observe that most exampels have less than 4 labels. So the Target is going to be sparse.
 
 ![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/master/approach/labels_len.png?raw=true)
