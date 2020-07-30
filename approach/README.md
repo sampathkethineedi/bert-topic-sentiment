@@ -51,6 +51,8 @@ We also observe that most exampels have less than 4 labels. So the Target is goi
 
 Coming to text
 
-| len mean | 22.455586261350177 |
-| len std | 31.524501540800433 |
-| len max | 626 |
+len mean 22.455586261350177
+
+len std 31.524501540800433
+
+len max 626

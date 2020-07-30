@@ -53,7 +53,6 @@ class PandasDataset:
         :param target: target label
         :return:
         """
-        self.current_df.topics.explode().str.replace(label, target)
 
         def replace_lab(x):
             return [top if top != label else target for top in x]
