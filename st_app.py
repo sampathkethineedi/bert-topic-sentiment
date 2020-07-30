@@ -7,7 +7,7 @@ headers = {'content-type': 'application/json'}
 
 
 st.write("## Topic Based Sentiment Detection")
-st.write("### Fine Tuning multi label classification model on top of BERT")
+st.write("### Fine Tuning BERT for multi label classification")
 st.write("API Docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)")
 
 input_text: str = st.text_area(label="Input Text")
