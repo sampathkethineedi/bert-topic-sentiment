@@ -1,5 +1,5 @@
 
-I have approached this as a multi-label classification problem and used transformer based approach to fine tune a pre-trained BERT model. 
+I have considered this as a multi-label classification problem and used transformer based approach to fine tune a pre-trained BERT model. 
 
 ### Primary reasons for this
 - Relatively small Dataset
