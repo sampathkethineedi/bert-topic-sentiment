@@ -56,7 +56,7 @@ Run `streamlit run st_app.py`
 
 App at `http://localhost:8501/`
 
-## Planned improvements
+## Planned Additions
 - Alternative approaches
 - Notebook for data exploration
 - Docker image
