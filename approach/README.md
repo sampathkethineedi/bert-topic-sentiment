@@ -63,7 +63,7 @@ Here is label distribution of the final dataset. We have **23 topic-sentiment la
 
 ![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/master/approach/labels_all_2.png?raw=true)
 
-We also observe that most exampels have less than 4 labels. So the Target is going to be sparse.
+We also observe that most exampels have less than 4 labels
 
 ![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/master/approach/labels_len.png?raw=true)
 
