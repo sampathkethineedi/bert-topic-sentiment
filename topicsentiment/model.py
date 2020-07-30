@@ -11,6 +11,10 @@ config = config.Settings()
 
 
 class BertForMultiLabel(BertPreTrainedModel):
+    """Bert model with custom classifier for Multi Label classification
+    Inherits from BertModel in transformers library
+
+    """
     def __init__(self, model_config):
         super(BertForMultiLabel, self).__init__(model_config)
         self.bert = BertModel.from_pretrained(config.PRE_TRAINED_MODEL)
@@ -25,6 +29,9 @@ class BertForMultiLabel(BertPreTrainedModel):
 
 
 class Trainer:
+    """Trainer class to manage the complete training process
+
+    """
     def __init__(self, model, optimizer, loss_fun):
         self.device = config.DEVICE
         self.model = model
@@ -46,7 +53,15 @@ class Trainer:
             os.makedirs(config.MODEL_DIR)
             os.makedirs(os.path.join(config.MODEL_DIR, 'metrics'))
 
-    def train(self, epochs, training_loader, testing_loader=None, validate=False):
+    def train(self, epochs: int, training_loader, testing_loader=None, validate: bool = False):
+        """ Trains the model for input epochs
+
+        :param epochs:
+        :param training_loader:
+        :param testing_loader:
+        :param validate: if set to true Runs validation after every epoch
+        :return: metrics dictionary
+        """
         for epoch in range(epochs):
             self.model.train()
             epoch_loss = 0
@@ -76,6 +91,11 @@ class Trainer:
         return self.metrics
 
     def validate(self, testing_loader):
+        """ Runs validation on the model current state
+
+        :param testing_loader:
+        :return: metrics
+        """
         self.model.eval()
         fin_targets = []
         fin_outputs = []
@@ -103,9 +123,21 @@ class Trainer:
         return self.metrics
 
     def save_model(self, path: str):
+        """Save only the model
+
+        :param path:
+        :return:
+        """
         torch.save(self.model, path)
 
     def save_all(self, path: str, tokenizer: BertTokenizer, label_encoder):
+        """Save all files needed for inference
+
+        :param path:
+        :param tokenizer: Bert tokenizer
+        :param label_encoder: label encoder
+        :return:
+        """
         torch.save(self.model.state_dict(), os.path.join(path, config.MODEL_NAME))
         tokenizer.save_pretrained(path)
         output = open(os.path.join(path, 'label_encoder.pkl'), 'wb')
@@ -113,6 +145,12 @@ class Trainer:
         output.close()
 
     def plot_metrics(self, metric: str, view: bool = False):
+        """Plot an individual metric
+
+        :param metric:
+        :param view: if set to true opens a window
+        :return:
+        """
         plt.plot(range(len(self.metrics[metric])), self.metrics[metric], '-b', label=metric)
 
         plt.xlabel("Epochs")
@@ -129,6 +167,9 @@ class Trainer:
 
 
 class FocalLossLogits(torch.nn.Module):
+    """Foc loss implementation using torch
+
+    """
     def __init__(self, alpha=1, gamma=2):
         super(FocalLossLogits, self).__init__()
         self.alpha = alpha

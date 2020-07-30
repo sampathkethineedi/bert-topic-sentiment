@@ -2,6 +2,9 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
+    """Settings class to store training parameters. Set this before running the train
+
+    """
 
     NUM_LABELS: int = 23
     MAX_LEN: int = 64

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from transformers import BertConfig, AutoTokenizer
-from model import BertForMultiLabel
+from topicsentiment.model import BertForMultiLabel
 import torch
 import config
 from typing import List

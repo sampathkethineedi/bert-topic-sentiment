@@ -23,13 +23,16 @@ def pre_process(filename: str = 'sentisum-evaluation-dataset.csv', verbose: bool
     if verbose:
         print(pd_dataset.overview())
 
+    # Fixing dataset specific issues
+    # Method can be sed to merge similar labels with low samples
     pd_dataset.replace_labels('advisor/agent service negative', 'advisoragent service negative')
     pd_dataset.replace_labels('advisor/agent service positive', 'advisoragent service positive')
     logger.info('Replacing labels complete')
 
-    pd_dataset.adjust_labels(minimum_samples=100, minority_label="others")
+    pd_dataset.merge_labels(minimum_samples=100, minority_label="others")
     logger.info('Minority labels adjusted')
 
+    # Under sampling majority labels
     pd_dataset.undersample_label('value for money positive', 0.1)
     pd_dataset.undersample_label('garage service positive', 0.2)
     pd_dataset.undersample_label_combo('value for money positive', 'garage service positive', 0.2)
@@ -78,8 +81,8 @@ def prepare_train(train_dataset, test_dataset, verbose=False):
 
 
 def parse_args():
-    """
-    Use default arguments or add extra arguments
+    """Argument parser
+
     :return: args
     """
     parser = argparse.ArgumentParser()
