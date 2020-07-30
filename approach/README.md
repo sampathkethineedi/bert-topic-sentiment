@@ -27,14 +27,23 @@ VAL Dataset: 1552
 
 There are **62 unique topic-sentiment labels** (after fixing a few duplicates)
 
+![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/master/approach/labels_dist.png?raw=true)
+
 Most of the topics have both positive and negative samples
 
 There are a lot of labels with less than a 100 samples. I have categorised these into two labels - **others positive** and **others negative**
 
+![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/master/approach/labels_low_sample.png?raw=true)
+
 In terms of sentiment, the majority are positive. This is largely because the two labels - **value for money** and **garage service**
+
+![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/master/approach/pos_neg.png?raw=true)
+
 I have under sampled these by removing a large fraction of single occurances. This also took care of the positive negative imbalance to an extent
 
 We also observe that most exampels have less than 4 labels. So the Target is going to be sparse.
+
+![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/master/approach/labels_len.png?raw=true)
 
 | Number of Labels | Examples |
 | --- | --- |
