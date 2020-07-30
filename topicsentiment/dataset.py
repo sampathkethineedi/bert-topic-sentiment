@@ -160,13 +160,6 @@ class PandasDataset:
         test_dataset = test_dataset.reset_index(drop=True)
         return train_dataset, test_dataset
 
-    def merge_topics(self):
-        """
-        todo Merge a list of topics to one
-        :return:
-        """
-        pass
-
 
 class TorchDataset(Dataset):
     """Cstom dataset for converting examples to features in Bert format

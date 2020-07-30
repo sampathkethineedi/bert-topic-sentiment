@@ -162,6 +162,10 @@ class Trainer:
         plt.clf()
 
     def save_metric_plots(self):
+        """Save all metric plots to model dir
+
+        :return:
+        """
         for metric in self.metrics.keys():
             self.plot_metrics(metric)
 
