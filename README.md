@@ -9,34 +9,33 @@ Topic Based Sentiment Detection using BERT
 - streamlit
 - fastapi
 - Pandas
-- Alternatively, run the docker image with standard config
 
 ### Setup
-- Clone
+- Clone the repo
 - Install requirements
+- Download pre-trained model files here
 
-## Train
-Run ``
+## Training
+
+Pandas and Torch dataset classes in **dataset.py**
+Model Class and Trainer Class in **model.py**
+Configuration in **config.py**
+
+Run `python main_process.py --data sentisum-evaluation-dataset.csv --train`
 
 ## Prediction API
 Using FastAPI
 
 Run `uvicorn prediction_api:app`
 
-###  API Documentation
 Swagger Docs at `http://127.0.0.1:8000/docs`
 
 ## Streamlit Interface
+Code in **st_app.py**
+
 Run `streamlit run st_app.py`
 
 App at `http://localhost:8501/`
-
-## Planned Improvements
-- Selective topic merging
-- Trainer CLI
-- Add visual metrics to Trainer
-- Add colab notebook for data exploration
-- Docker image
 
 ## References
 - Add Alternative approaches
