@@ -6,6 +6,9 @@ import torch
 
 
 class PandasDataset:
+    """Class to simplify pre processing steps on dataframe. Requires prioir understanding of the dataset
+
+    """
     def __init__(self, filename: str = "sentisum-evaluation-dataset.csv"):
         self.filename = filename
         self.original_df = None
@@ -44,6 +47,12 @@ class PandasDataset:
         return self.current_df
 
     def replace_labels(self, label: str, target: str):
+        """Replace occurances of all labels with the target label
+
+        :param label: source label
+        :param target: target label
+        :return:
+        """
         self.current_df.topics.explode().str.replace(label, target)
 
         def replace_lab(x):
@@ -51,10 +60,11 @@ class PandasDataset:
 
         self.current_df.topics = self.current_df.topics.map(replace_lab)
 
-    def adjust_labels(self, minimum_samples: int = 100, minority_label: str = 'others'):
-        """Adjust labels
+    def merge_labels(self, minimum_samples: int = 100, minority_label: str = 'others'):
+        """Merge Labels with less than minimum samples
 
-        :param:
+        :param minimum_samples:
+        :param minority_label: name for the common label
         :return:
         """
         label_counts = self.current_df.topics.explode().value_counts()
@@ -80,6 +90,12 @@ class PandasDataset:
         return self.current_df
 
     def undersample_label(self, topic: str, fraction: float):
+        """Undersample a given label. Selectively works on single occurances
+
+        :param topic:
+        :param fraction: fraction to retain
+        :return:
+        """
         temp_df = self.current_df[self.current_df.topics.apply(lambda x: topic in x)]
         temp_df = temp_df[temp_df.topics.str.len() == 1].sample(frac=fraction)
 
@@ -89,6 +105,13 @@ class PandasDataset:
         self.current_df = self.current_df.append(temp_df)
 
     def undersample_label_combo(self, topic_a: str, topic_b: str, fraction: float):
+        """Under sample a given combination of labels.
+        todo Add a combo with more than 2 topics
+        :param topic_a:
+        :param topic_b:
+        :param fraction: fraction to retain
+        :return:
+        """
         temp_df = self.current_df[self.current_df.topics.apply(lambda x: x == [topic_a, topic_b])]
         temp_df = temp_df[temp_df.topics.str.len() == 2].sample(frac=fraction)
 
@@ -99,13 +122,22 @@ class PandasDataset:
         self.current_df = self.current_df.append(temp_df)
 
     def overview(self):
+        """Gives a quick overview of the current dataframe
+
+        :return:
+        """
         return {
             "value_counts": self.current_df.topics.explode().value_counts(),
+            "labels": self.current_df.topics.explode().unique(),
             "mean no. of tokens": self.current_df.text.str.split().str.len().std(),
             "mean no. of sentences": self.current_df.text.str.split('.').str.len().std()
         }
 
     def encode_labels(self):
+        """Encode the label classes for classification using MultiLabelBinarizer
+
+        :return: class list
+        """
         def l2t(x):
             return tuple(x)
 
@@ -115,36 +147,47 @@ class PandasDataset:
 
         self.current_df['encoded'] = self.label_encoder.fit_transform(self.current_df.topics.tolist()).tolist()
 
-        return self.label_encoder.classes_
+        return self.label_encoder.classes_.tolist()
 
     def train_test_split(self, test_size: float = 0.2):
+        """Generate train and test sets
+
+        :param test_size: test set fraction
+        :return: train_dataset, test_dataset
+        """
         train_dataset, test_dataset = train_test_split(self.current_df, test_size=test_size)
         train_dataset = train_dataset.reset_index(drop=True)
         test_dataset = test_dataset.reset_index(drop=True)
         return train_dataset, test_dataset
 
-    def merge_topics(self):
-        """
-        todo Merge a list of topics to one
-        :return:
-        """
-        pass
-
 
 class TorchDataset(Dataset):
+    """Cstom dataset for converting examples to features in Bert format
+
+    """
 
     def __init__(self, dataframe, tokenizer, max_len):
+        """
+
+        :param dataframe: pandas dataframe
+        :param tokenizer: bert tokenizer
+        :param max_len: tokenizer max len
+        """
         self.tokenizer = tokenizer
         self.data = dataframe
         self.text = dataframe.text
         self.targets = self.data.encoded
         self.max_len = max_len
-        self.label_encoder = None
 
     def __len__(self):
         return len(self.text)
 
     def __getitem__(self, index):
+        """Convert examples to features in Bert format
+
+        :param index: idx
+        :return:
+        """
         text = str(self.text[index])
         text = " ".join(text.split())
 
@@ -169,4 +212,11 @@ class TorchDataset(Dataset):
         }
 
     def get_dataloader(self, batch_size: int = 16, shuffle: bool = True, num_workers: int = 0):
+        """Generate dataloaders for Pytorch training
+
+        :param batch_size: batch size
+        :param shuffle:
+        :param num_workers:
+        :return: dataloader
+        """
         return DataLoader(self, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
