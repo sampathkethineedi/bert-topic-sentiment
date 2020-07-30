@@ -15,6 +15,9 @@ FULL Dataset: 7757
 TRAIN Dataset: 6205
 VAL Dataset: 1552
 
+Training Accuracy Saturated at around 0.8 after 7 Epochs
+Training Loss quickly reached 0.2 and saturated at 0.008 after 7 Epochs
+
 | Metric | Score |
 | --- | --- |
 | Accuracy Score | 0.8200171821305842 |
@@ -62,10 +65,22 @@ We also observe that most exampels have less than 4 labels. So the Target is goi
 | 9 | 4 |
 | 10 | 2 |
 
-Coming to text
+Most Text are under 64 tokens with a few exceptions. This led to the tokenizer max length as 64
 
-len mean 22.455586261350177
+len mean 22.455586261350177; len std 31.524501540800433; len max 626
 
-len std 31.524501540800433
+## Improvements and Alternate approaches
 
-len max 626
+- Even fine-tuning the Transformer requires significant compute resources. With the BERT base model I had to wait 10-15 mins on Colab GPU for each iteration. There are more powerful models like T5 or BERT large which could give better results.
+
+- Experiment with more layers on top of BERT. My implementation only has a dropout and a linear layer.
+
+- Experiment with Batch Sizes, Learning rates and optimizers. These usually have marginal improvemetns so I did not spend time on this
+
+- Experiment with custom loss function. I used Binary Cross Entropy and Focal Loss and found BCE was better. I intentionally ignore the imbalance to let the model learn the frequency patterns.
+
+- Cluster the topics and use a hierarchial classifier. Intuitive clusters - **service, monetory, time**. This might cover even a few topics I ignored due to low samples.
+
+- Selective merging of topics based on co-occurance.
+
+- I considered a **clause level** topic and sentiment classification but the dataset only has sample level values for topic. And majority of sentences do not follow standard english syntax so dependedncy parsing was not possible to get the clauses.
