@@ -15,11 +15,13 @@ FULL Dataset: 7757
 TRAIN Dataset: 6205
 VAL Dataset: 1552
 
-Accuracy Score: 0.8200171821305842
-Hamming Score: 0.9051907142113328
-F1 Score (Micro) = 0.9182371701942591
-F1 Score (Macro) = 0.7874733783966089
-F1 Score (Weighted) = 0.9039791053690711
+| Metric | Score |
+| --- | --- |
+| Accuracy Score | 0.8200171821305842 |
+| Hamming Score | 0.9051907142113328 |
+| F1 Score (Micro) | 0.9182371701942591 |
+| F1 Score (Macro) | 0.7874733783966089 |
+| F1 Score (Weighted)| 0.9039791053690711 |
 
 ## Understanding the data
 
@@ -34,19 +36,21 @@ I have under sampled these by removing a large fraction of single occurances. Th
 
 We also observe that most exampels have less than 4 labels. So the Target is going to be sparse.
 
-2007 example(s) with 1 labels
-3897 example(s) with 2 labels
-2705 example(s) with 3 labels
-1085 example(s) with 4 labels
-313 example(s) with 5 labels
-91 example(s) with 6 labels
-22 example(s) with 7 labels
-5 example(s) with 8 labels
-4 example(s) with 9 labels
-2 example(s) with 10 labels
+| Number of Labels | Examples |
+| --- | --- |
+| 1 | 2007 |
+| 2 | 3897 |
+| 3 | 2705 |
+| 4 | 1085 |
+| 5 | 313 |
+| 6 | 91 |
+| 7 | 22 |
+| 8 | 5 |
+| 9 | 4 |
+| 10 | 2 |
 
 Coming to text
 
-Text len mean 22.455586261350177
-Text len std 31.524501540800433
-Text len max 626
+| len mean | 22.455586261350177 |
+| len std | 31.524501540800433 |
+| len max | 626 |
