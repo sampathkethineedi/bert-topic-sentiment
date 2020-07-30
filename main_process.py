@@ -40,8 +40,6 @@ def pre_process(filename: str = 'sentisum-evaluation-dataset.csv', verbose: bool
 
     pd_dataset.encode_labels()
 
-    pd_dataset.current_df = pd_dataset.current_df.sample(frac=0.01)  # todo only for local dev
-
     train_dataset, test_dataset = pd_dataset.train_test_split(0.2)
     logger.info('Pre processing complete...')
 
@@ -102,9 +100,8 @@ if __name__ == "__main__":
                                                                                     args.verbose)
         logger.info("Training started...")
         trainer.train(config.EPOCHS, training_dataloader, testing_dataloader, validate=True)
+        trainer.save_metric_plots()
         logger.info("Training complete")
 
         trainer.save_all(config.MODEL_DIR, tokenizer, label_encoder)
         logger.info("Files saved at "+config.MODEL_DIR)
-        print(trainer.metrics['epoch_loss'])
-        trainer.plot_metrics('epoch_loss')

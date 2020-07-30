@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from transformers import BertConfig, AutoTokenizer
-from model import BERTClass
+from model import BertForMultiLabel
 import torch
 import config
 from typing import List
@@ -12,12 +12,12 @@ import os
 config = config.Settings()
 
 model_config = BertConfig()
-model = BERTClass(model_config)
-model.load_state_dict(torch.load(os.path.join(config.MODEL_DIR, config.MODEL_NAME), map_location=config.DEVICE))
+model = BertForMultiLabel(model_config)
+model.load_state_dict(torch.load(os.path.join(config.MODEL_DIR, config.MODEL_NAME_COLAB), map_location=config.DEVICE))
 
 tokenizer = AutoTokenizer.from_pretrained(config.PRE_TRAINED_MODEL)
 
-with open(os.path.join(config.MODEL_DIR, 'enc.pickle'), 'rb') as f:
+with open(os.path.join(config.MODEL_DIR, 'label_encoder.pkl'), 'rb') as f:
     label_encoder = pickle.load(f)
     f.close()
 

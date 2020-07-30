@@ -121,6 +121,7 @@ class Trainer:
         plt.savefig(os.path.join(config.MODEL_DIR, 'metrics', metric + ".png"))
         if view:
             plt.show()
+        plt.clf()
 
     def save_metric_plots(self):
         for metric in self.metrics.keys():
