@@ -1,8 +1,8 @@
 import torch
-from transformers import BertModel, BertPreTrainedModel, BertTokenizer, AutoTokenizer, BertConfig
+from transformers import BertModel, BertPreTrainedModel, BertTokenizer
 import numpy as np
 from sklearn import metrics
-from typing import Optional
+import matplotlib.pyplot as plt
 import pickle
 import os
 import config
@@ -10,42 +10,39 @@ import config
 config = config.Settings()
 
 
-class BERTClass(BertPreTrainedModel):
+class BertForMultiLabel(BertPreTrainedModel):
     def __init__(self, model_config):
-        super(BERTClass, self).__init__(model_config)
+        super(BertForMultiLabel, self).__init__(model_config)
         self.bert = BertModel.from_pretrained(config.PRE_TRAINED_MODEL)
-        self.l2 = torch.nn.Dropout(0.3)
-        self.l3 = torch.nn.Linear(768, config.NUM_LABELS)
+        self.drp = torch.nn.Dropout(0.3)
+        self.classifier = torch.nn.Linear(768, config.NUM_LABELS)
 
     def forward(self, ids, mask, token_type_ids):
         _, output_1 = self.bert(ids, attention_mask=mask, token_type_ids=token_type_ids)
-        output_2 = self.l2(output_1)
-        output = self.l3(output_2)
+        output_2 = self.drp(output_1)
+        output = self.classifier(output_2)
         return output
 
 
 class Trainer:
-    def __init__(self, path: str, load: bool = False):
+    def __init__(self, model, optimizer, loss_fun):
         self.device = config.DEVICE
-        self.global_epochs = 0
-        self.optimizer = None
-        self.loss_fun = None
-
-        if load:
-            self.load(path)
-        else:
-            self.model = None
-            self.tokenizer = None
-
-    def prepare(self, model: Optional, optimizer, loss_fun):
-        if not self.model:
-            self.model = model
+        self.model = model
         self.optimizer = optimizer
         self.loss_fun = loss_fun
+        self.metrics = {
+            "epoch_loss": [],
+            "step_loss": [],
+            "f1_score_macro": [],
+            "f1_score_micro": [],
+            "accuracy": []
+        }
+        self.global_epochs = 0
 
     def train(self, epochs, training_loader, testing_loader=None, validate=False):
         for epoch in range(epochs):
             self.model.train()
+            epoch_loss = 0
             for _, data in enumerate(training_loader, 0):
                 ids = data['ids'].to(self.device, dtype=torch.long)
                 mask = data['mask'].to(self.device, dtype=torch.long)
@@ -56,15 +53,20 @@ class Trainer:
 
                 self.optimizer.zero_grad()
                 loss = self.loss_fun(outputs, targets)
+                epoch_loss = loss.item()
                 if _ % 200 == 0:
                     print(f'Epoch: {epoch}, Loss:  {loss.item()}')
-
+                    self.metrics["step_loss"].append(loss.item())
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
                 self.global_epochs += 1
             if validate:
                 self.validate(testing_loader)
+
+            self.metrics["loss"].append(epoch_loss)
+
+        return self.metrics
 
     def validate(self, testing_loader):
         self.model.eval()
@@ -84,10 +86,14 @@ class Trainer:
         accuracy = metrics.accuracy_score(fin_targets, fin_outputs)
         f1_score_micro = metrics.f1_score(fin_targets, fin_outputs, average='micro')
         f1_score_macro = metrics.f1_score(fin_targets, fin_outputs, average='macro')
+        self.metrics["accuracy"].append(accuracy)
+        self.metrics["f1_score_micro"].append(f1_score_micro)
+        self.metrics["f1_score_macro"].append(f1_score_macro)
         print(f"Accuracy Score = {accuracy}")
         print(f"F1 Score (Micro) = {f1_score_micro}")
         print(f"F1 Score (Macro) = {f1_score_macro}")
         print("------------------------------------")
+        return self.metrics
 
     def save_model(self, path: str):
         torch.save(self.model, path)
@@ -99,44 +105,14 @@ class Trainer:
         pickle.dump(label_encoder, output)
         output.close()
 
-    def predict(self, text: str, tokenizer: Optional, label_encoder, threshold: float = 0.2, max_len: int = 64):
+    def plot_metrics(self, metric: str):
+        plt.plot(range(len(self.metrics[metric])), self.metrics[metric], '-b', label=metric)
 
-        if not self.tokenizer:
-            self.tokenizer = tokenizer
-
-        encoded_text = self.tokenizer.encode_plus(
-            text,
-            max_length=max_len,
-            add_special_tokens=True,
-            return_token_type_ids=True,
-            pad_to_max_length=True,
-            return_attention_mask=True,
-            truncation=True,
-            return_tensors='pt',
-        )
-
-        encoded_text.to(self.device)
-
-        output = self.model(encoded_text["input_ids"], encoded_text["attention_mask"],
-                            encoded_text["token_type_ids"]).sigmoid()
-
-        prediction = [1 if i > threshold else 0 for i in output[0]]
-
-        label = label_encoder.inverse_transform(np.array([prediction]))[0]
-
-        print(f'Review text: {text}')
-        print(f'Prediction  : {label}')
-
-        return label
-
-    def load(self, path: str):
-        model_config = BertConfig()
-        self.model = BERTClass(model_config)
-        self.model.load_state_dict(torch.load(path, map_location=config.DEVICE))
-
-        tokenizer = AutoTokenizer.from_pretrained(config.PRE_TRAINED_MODEL)
-
-        return "Model load from '{}' complete".format(path)
+        plt.xlabel("Epochs")
+        plt.legend(loc='upper left')
+        plt.title(metric)
+        plt.savefig(os.path.join(config.MODEL_DIR, metric + ".png"))
+        plt.show()
 
 
 class FocalLossLogits(torch.nn.Module):

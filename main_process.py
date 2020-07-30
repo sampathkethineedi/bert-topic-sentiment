@@ -5,37 +5,46 @@ from model import BERTClass, Trainer, FocalLossLogits
 import pandas as pd
 import torch
 import argparse
+import logging
 
 config = config.Settings()
 
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-def pre_process(filename: str = "sentisum-evaluation-dataset.csv", verbose: bool = False):
+
+def pre_process(filename: str = 'sentisum-evaluation-dataset.csv', verbose: bool = False):
     pd_dataset = PandasDataset(filename)
     pd_dataset.load_data()
+    logger.info('Dataset loaded')
 
     pd.set_option('display.max_rows', 100)
-    pd_dataset.overview()
     if verbose:
         print(pd_dataset.overview())
 
-    pd_dataset.replace_labels('advisor/agent service negative', "advisoragent service negative")
-    pd_dataset.replace_labels('advisor/agent service positive', "advisoragent service positive")
+    pd_dataset.replace_labels('advisor/agent service negative', 'advisoragent service negative')
+    pd_dataset.replace_labels('advisor/agent service positive', 'advisoragent service positive')
+    logger.info('Replacing labels complete')
 
     pd_dataset.adjust_labels(minimum_samples=100, minority_label="others")
+    logger.info('Minority labels adjusted')
 
     pd_dataset.undersample_label('value for money positive', 0.1)
     pd_dataset.undersample_label('garage service positive', 0.2)
     pd_dataset.undersample_label_combo('value for money positive', 'garage service positive', 0.2)
+    logger.info('Undersampling complete')
 
-    pd_dataset.current_df.sample(frac=0.01)
+    pd_dataset.current_df.sample(frac=0.01)  # todo only for dev
     if verbose:
         print(pd_dataset.overview())
 
     pd_dataset.encode_labels()
 
     train_dataset, test_dataset = pd_dataset.train_test_split(0.2)
+    logger.info('Pre processing complete...')
 
-    return train_dataset, test_dataset
+    return train_dataset, test_dataset, pd_dataset.label_encoder
 
 
 def prepare_train(train_dataset, test_dataset, verbose=False):
@@ -56,21 +65,18 @@ def prepare_train(train_dataset, test_dataset, verbose=False):
     optimizer = torch.optim.Adam(params=model.parameters(), lr=config.LEARNING_RATE)
 
     def loss_fn(outputs, targets):
-        return FocalLossLogits()(outputs, targets)
+        return torch.nn.BCEWithLogitsLoss()(outputs, targets)
+
+    if config.LOSS_FUN == 'focal':
+        def loss_fn(outputs, targets):
+            return FocalLossLogits()(outputs, targets)
 
     trainer = Trainer(config.MODEL_DIR)
     trainer.prepare(model, optimizer, loss_fn)
 
-    if verbose:
-        print("\n Trainer prepared")
+    logger.info("Trainer prepared")
 
-    return trainer, training_dataloader, testing_dataloader
-
-
-def train(trainer, training_dataloader,  testing_dataloader):
-    trainer.train(config.EPOCHS, training_dataloader, testing_dataloader, validate=True)
-
-# trainer.save_all(config.MODEL_DIR, tokenizer, torch_training_set.label_encoder)
+    return trainer, training_dataloader, testing_dataloader, tokenizer
 
 
 def parse_args():
@@ -88,6 +94,15 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    train_dataset, test_dataset = pre_process(args.verbose)
+    train_dataset, test_dataset, label_encoder = pre_process(args.data, args.verbose)
+
     if args.train:
-        prepare_train(train_dataset, test_dataset, args.verbose)
+        trainer, training_dataloader, testing_dataloader, tokenizer = prepare_train(train_dataset,
+                                                                                    test_dataset,
+                                                                                    args.verbose)
+        logger.info("Training started...")
+        trainer.train(config.EPOCHS, training_dataloader, testing_dataloader, validate=True)
+        logger.info("Training complete")
+
+        trainer.save_all(config.MODEL_DIR, tokenizer, label_encoder)
+        logger.info("Files saved at "+config.MODEL_DIR)
