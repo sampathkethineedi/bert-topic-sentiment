@@ -1,6 +1,7 @@
 
-## Model Class
-```
+## BERT Model Class
+
+```python
 class BertForMultiLabel(BertPreTrainedModel):
     """Bert model with custom classifier for Multi Label classification
     Inherits from BertModel in transformers library
@@ -19,9 +20,9 @@ class BertForMultiLabel(BertPreTrainedModel):
         return output
 ```
 
-## Trainer Class
+## Main Trainer Class
 
-```
+```python
 class Trainer:
     """Trainer class to manage the complete training process
 
