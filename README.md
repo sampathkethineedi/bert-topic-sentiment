@@ -2,6 +2,8 @@
 
 ![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/dev/st_interface.png?raw=true)
 
+Jump to this [document](https://github.com/sampathkethineedi/sentisum-topic-sentiment/tree/master/approach) to undertand the data, approach and further improvements
+
 ### Requirements
 - transformers
 - torch
@@ -30,7 +32,11 @@ Jump to [topicsentiment](https://github.com/sampathkethineedi/sentisum-topic-sen
 
 Configuration in **config.py**
 
-Run `python train.py --data sentisum-evaluation-dataset.csv --train`
+Run `python train.py --data sentisum-evaluation-dataset.csv` for full pipeline - preprocess and train
+
+Run `python train.py --data sentisum-evaluation-dataset.csv --preprocess` saves the preprocessed dataset to *model_dir* in config
+
+Run `python train.py --data final_data.pkl --train` trains the preprocessed dataset
 
 ## Prediction API
 Built using FastAPI
@@ -50,7 +56,7 @@ Run `streamlit run st_app.py`
 
 App at `http://localhost:8501/`
 
-## Planned improvements
+## Planned Additions
 - Alternative approaches
 - Notebook for data exploration
 - Docker image
