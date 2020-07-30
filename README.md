@@ -1,5 +1,4 @@
-# sentisum-topic-sentiment - dev
-Topic Based Sentiment Detection using BERT
+# Topic Based Sentiment Detection using BERT
 
 ![alt text](https://github.com/sampathkethineedi/sentisum-topic-sentiment/blob/dev/st_interface.png?raw=true)
 
@@ -12,8 +11,14 @@ Topic Based Sentiment Detection using BERT
 
 ### Setup
 - Clone the repo
-- Install requirements
+- Install requirements: `conda create --name topicsentiment --file requirements.txt` or `pip install -r requirements.txt` in your env
 - Download pre-trained model files here
+- Copy the files to model_dir in config
+
+#### Running the demo
+- Run `uvicorn prediction_api:app`
+- Run `streamlit run st_app.py`
+- Go to `http://localhost:8501/`
 
 ## Training
 
@@ -25,10 +30,12 @@ Jump to topicsentiment for detailed info
 
 Configuration in **config.py**
 
-Run `python main_process.py --data sentisum-evaluation-dataset.csv --train`
+Run `python train.py --data sentisum-evaluation-dataset.csv --train`
 
 ## Prediction API
 Built using FastAPI
+
+Code in **prediction_api.py**
 
 Run `uvicorn prediction_api:app`
 
@@ -42,6 +49,11 @@ Code in **st_app.py**
 Run `streamlit run st_app.py`
 
 App at `http://localhost:8501/`
+
+## Planned improvements
+- Alternative approaches
+- Notebook for data exploration
+- Docker image
 
 ## References
 - Add Alternative approaches
