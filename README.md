@@ -12,8 +12,8 @@
 ### Setup
 - Clone the repo
 - Install requirements: `conda create --name topicsentiment --file requirements.txt` or `pip install -r requirements.txt` in your env
-- Download pre-trained model files here
-- Copy the files to model_dir in config
+- Download pre-trained model files [here](https://drive.google.com/drive/folders/1wWui9xZk0fnPzV06OHaKBS8xqJSOLPzS?usp=sharing)
+- Copy the files to *model_dir* in config
 
 #### Running the demo
 - Run `uvicorn prediction_api:app`
