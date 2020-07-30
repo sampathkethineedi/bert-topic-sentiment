@@ -26,7 +26,7 @@ Pandas and Torch dataset classes in **topicsentiment/dataset.py**
 
 Model Class and Trainer Class in **topicsentiment/model.py**
 
-Jump to topicsentiment for detailed info
+Jump to [topicsentiment](https://github.com/sampathkethineedi/sentisum-topic-sentiment/tree/master/topicsentiment) for detailed info
 
 Configuration in **config.py**
 
