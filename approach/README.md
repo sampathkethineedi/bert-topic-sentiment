@@ -1,4 +1,3 @@
-# Final Approach
 
 I have approached this as a multi-label classification problem and used transformer based approach to fine tune a pre-trained BERT model. 
 
