@@ -169,5 +169,4 @@ class TorchDataset(Dataset):
         }
 
     def get_dataloader(self, batch_size: int = 16, shuffle: bool = True, num_workers: int = 0):
-        return DataLoader(self, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers )
-
+        return DataLoader(self, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)

@@ -18,7 +18,7 @@ class BERTClass(BertPreTrainedModel):
         self.l3 = torch.nn.Linear(768, config.NUM_LABELS)
 
     def forward(self, ids, mask, token_type_ids):
-        _, output_1 = self.bert(ids, attention_mask= mask, token_type_ids = token_type_ids)
+        _, output_1 = self.bert(ids, attention_mask=mask, token_type_ids=token_type_ids)
         output_2 = self.l2(output_1)
         output = self.l3(output_2)
         return output
@@ -56,7 +56,7 @@ class Trainer:
 
                 self.optimizer.zero_grad()
                 loss = self.loss_fun(outputs, targets)
-                if _%200 == 0:
+                if _ % 200 == 0:
                     print(f'Epoch: {epoch}, Loss:  {loss.item()}')
 
                 self.optimizer.zero_grad()
@@ -117,7 +117,8 @@ class Trainer:
 
         encoded_text.to(self.device)
 
-        output = self.model(encoded_text["input_ids"], encoded_text["attention_mask"], encoded_text["token_type_ids"]).sigmoid()
+        output = self.model(encoded_text["input_ids"], encoded_text["attention_mask"],
+                            encoded_text["token_type_ids"]).sigmoid()
 
         prediction = [1 if i > threshold else 0 for i in output[0]]
 
@@ -148,6 +149,7 @@ class FocalLossLogits(torch.nn.Module):
         BCE_loss = torch.nn.BCEWithLogitsLoss()(inputs, targets)
 
         pt = torch.exp(-BCE_loss)
+        # noinspection PyTypeChecker
         f_loss = self.alpha * (1 - pt) ** self.gamma * BCE_loss
 
         return torch.mean(f_loss)
