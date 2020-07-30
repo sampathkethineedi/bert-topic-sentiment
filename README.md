@@ -8,7 +8,7 @@ Topic Based Sentiment Detection using BERT
 - torch
 - streamlit
 - fastapi
-- Pandas
+- pandas
 
 ### Setup
 - Clone the repo
@@ -18,7 +18,9 @@ Topic Based Sentiment Detection using BERT
 ## Training
 
 Pandas and Torch dataset classes in **dataset.py**
+
 Model Class and Trainer Class in **model.py**
+
 Configuration in **config.py**
 
 Run `python main_process.py --data sentisum-evaluation-dataset.csv --train`
