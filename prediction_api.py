@@ -11,6 +11,7 @@ import os
 
 config = config.Settings()
 
+# Load the model fro inference
 model_config = BertConfig()
 model = BertForMultiLabel(model_config)
 model.load_state_dict(torch.load(os.path.join(config.MODEL_DIR, config.MODEL_NAME_COLAB), map_location=config.DEVICE))
@@ -27,6 +28,9 @@ app = FastAPI(title='SentiSum Topic Based Sentiment Prediction API',
 
 
 class PredictInput(BaseModel):
+    """Input model for prediction
+
+    """
     input_text: str = Field(None, description='Input Text', example="Excellent price, good choice of garages and "
                                                                     "trouble free prompt fitting, with no wait")
     threshold: float = Field(0.3, description="Prediction Threshold", example=0.3)
@@ -46,7 +50,13 @@ def home():
 
 @app.post("/predict", description="Predict", response_model=PredictResponse)
 def get_prediction(req_body: PredictInput):
+    """Prediction
 
+    :param req_body:
+    :return:
+    """
+
+    # Encode the text to features
     encoded_text = tokenizer.encode_plus(
         req_body.input_text,
         max_length=req_body.max_len,
@@ -60,9 +70,11 @@ def get_prediction(req_body: PredictInput):
 
     try:
 
+        # Generate the output and pass through sigmoid
         output = model(encoded_text["input_ids"], encoded_text["attention_mask"],
                        encoded_text["token_type_ids"]).sigmoid()
 
+        # Filter out predictions less than the threshold
         prediction = [1 if i > req_body.threshold else 0 for i in output[0]]
 
         label = label_encoder.inverse_transform(np.array([prediction]))[0]
@@ -74,6 +86,10 @@ def get_prediction(req_body: PredictInput):
 
 @app.get("/labels", description="Labels")
 def get_labels():
+    """List out the label names
+
+    :return:
+    """
 
     return {
         "num_labels": len(label_encoder.classes_.tolist()),

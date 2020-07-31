@@ -11,6 +11,8 @@ import sys
 
 config = config.Settings()
 
+
+# Setting up logger
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -26,6 +28,13 @@ logger.addHandler(ch)
 
 
 def pre_process(filename: str = 'sentisum-evaluation-dataset.csv', verbose: bool = False):
+    """ Pre Processing. Takes in the CSV file and returns a 'PandasDataset' object
+
+    :param filename: CSV file name
+    :param verbose: To show Dataset overveiw after each step
+    :return:
+    """
+    # Create a PandasDataset
     pd_dataset = PandasDataset()
     pd_dataset.read_data(filename)
     logger.info('Dataset loaded')
@@ -52,32 +61,46 @@ def pre_process(filename: str = 'sentisum-evaluation-dataset.csv', verbose: bool
     if verbose:
         print(pd_dataset.overview())
 
+    # Encode the topics for multi label classification
     pd_dataset.encode_labels()
 
     return pd_dataset
 
 
 def prepare_train(pd_dataset: PandasDataset, verbose=False):
+    """Prepares the Trainer class and the dependencies. Returns the trainer
 
+    :param pd_dataset: PandasDataset object
+    :param verbose:
+    :return:
+    """
+
+    # Create train and test splits
     train_dataset, test_dataset = pd_dataset.train_test_split(0.2)
     logger.info('Test Split complete...')
 
+    # Initialise BERT tokenizer
     tokenizer = BertTokenizer.from_pretrained(config.PRE_TRAINED_MODEL)
 
+    # Create TorchDatasets for train and test
     torch_training_set = TorchDataset(train_dataset, tokenizer, config.MAX_LEN)
     torch_testing_set = TorchDataset(test_dataset, tokenizer, config.MAX_LEN)
 
+    # Create DataLoaders for train and test to be passed in to the model
     training_dataloader = torch_training_set.get_dataloader(batch_size=config.TRAIN_BATCH_SIZE)
     testing_dataloader = torch_testing_set.get_dataloader(batch_size=config.VALID_BATCH_SIZE)
 
+    # Initialise the model
     model_config = BertConfig()
     model = BertForMultiLabel(model_config)
     model.to(config.DEVICE)
     if verbose:
         print(model)
 
+    # Optimizer to be passed into Trainer
     optimizer = torch.optim.Adam(params=model.parameters(), lr=config.LEARNING_RATE)
 
+    # Loss Function to be passed into Trainer. Defaults to BCE
     def loss_fn(outputs, targets):
         return torch.nn.BCEWithLogitsLoss()(outputs, targets)
 
@@ -85,6 +108,7 @@ def prepare_train(pd_dataset: PandasDataset, verbose=False):
         def loss_fn(outputs, targets):
             return FocalLossLogits()(outputs, targets)
 
+    # Initialise Trainer
     trainer = Trainer(model, optimizer, loss_fn)
 
     logger.info("Trainer prepared")
@@ -107,8 +131,15 @@ def parse_args():
 
 
 def train(pd_dataset, verbose):
+    """Main Training process
+
+    :param pd_dataset: Pandas Dataset
+    :param verbose: verbose flag
+    :return:
+    """
 
     try:
+        # Prepare the Trainer
         trainer, training_dataloader, testing_dataloader, tokenizer = prepare_train(pd_dataset, verbose)
         logger.info("Training started...")
     except Exception as err:
@@ -116,6 +147,7 @@ def train(pd_dataset, verbose):
         sys.exit()
 
     try:
+        # Train and save metric plots
         trainer.train(config.EPOCHS, training_dataloader, testing_dataloader, validate=True)
         trainer.save_metric_plots()
         logger.info("Training complete")
@@ -124,6 +156,7 @@ def train(pd_dataset, verbose):
         sys.exit()
 
     try:
+        # Save all files needed for inference
         trainer.save_all(config.MODEL_DIR, tokenizer, pd_dataset.label_encoder)
         logger.info("Files saved at " + config.MODEL_DIR)
     except Exception as err:

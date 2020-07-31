@@ -16,6 +16,11 @@ class PandasDataset:
         self.label_encoder = None
 
     def from_preprocessed(self, path: str):
+        """Load from pre processed dataset file
+
+        :param path: path to pre processed PandasDataset file
+        :return:
+        """
         with open(path, 'rb') as f:
             dataset = pickle.load(f)
             self.original_df = dataset.original_df
